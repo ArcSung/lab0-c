@@ -11,6 +11,25 @@
  *   cppcheck-suppress nullPointer
  */
 
+static element_t *el_new(char *s)
+{
+    int str_size = sizeof(s);
+    element_t *new_el = malloc(sizeof(element_t));
+
+    if (new_el) {
+        new_el->value = malloc(str_size);
+
+        if (!new_el->value) {
+            free(new_el);
+            return NULL;
+        }
+
+        memcpy(new_el->value, s, str_size);
+        return new_el;
+    }
+
+    return NULL;
+}
 /*
  * Create empty queue.
  * Return NULL if could not allocate space.
@@ -18,6 +37,12 @@
 struct list_head *q_new()
 {
     struct list_head *new = malloc(sizeof(struct list_head));
+
+    if (new == NULL) {
+        return NULL;
+    }
+
+    INIT_LIST_HEAD(new);
 
     return new;
 }
@@ -34,7 +59,14 @@ void q_free(struct list_head *l) {}
  */
 bool q_insert_head(struct list_head *head, char *s)
 {
-    return true;
+    element_t *new_el = el_new(s);
+
+    if (new_el) {
+        list_add(&new_el->list, head);
+        return true;
+    }
+
+    return false;
 }
 
 /*
@@ -46,7 +78,14 @@ bool q_insert_head(struct list_head *head, char *s)
  */
 bool q_insert_tail(struct list_head *head, char *s)
 {
-    return true;
+    element_t *new_el = el_new(s);
+
+    if (new_el) {
+        list_add_tail(&new_el->list, head);
+        return true;
+    }
+
+    return false;
 }
 
 /*
@@ -65,7 +104,23 @@ bool q_insert_tail(struct list_head *head, char *s)
  */
 element_t *q_remove_head(struct list_head *head, char *sp, size_t bufsize)
 {
-    return NULL;
+    element_t *tmp_el;
+    struct list_head *li;
+
+    if (head == NULL || list_empty(head)) {
+        return NULL;
+    }
+
+    li = head->next;
+    int cpy_size =
+        sizeof(tmp_el->value) > bufsize ? bufsize : sizeof(tmp_el->value);
+    tmp_el = list_entry(li, element_t, list);
+    memcpy(sp, tmp_el->value, cpy_size);
+
+    li->next->prev = head;
+    head->next = li->next;
+
+    return tmp_el;
 }
 
 /*
@@ -74,7 +129,23 @@ element_t *q_remove_head(struct list_head *head, char *sp, size_t bufsize)
  */
 element_t *q_remove_tail(struct list_head *head, char *sp, size_t bufsize)
 {
-    return NULL;
+    element_t *tmp_el;
+    struct list_head *li;
+
+    if (head == NULL || list_empty(head)) {
+        return NULL;
+    }
+
+    li = head->prev;
+    int cpy_size =
+        sizeof(tmp_el->value) > bufsize ? bufsize : sizeof(tmp_el->value);
+    tmp_el = list_entry(li, element_t, list);
+    memcpy(sp, tmp_el->value, cpy_size);
+
+    head->prev = li->prev;
+    li->prev->next = head;
+
+    return tmp_el;
 }
 
 /*
