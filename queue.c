@@ -286,7 +286,7 @@ void q_swap(struct list_head *head)
     struct list_head *pre_li = head;
     struct list_head *fir_li = head->next;
     struct list_head *sec_li = head->next->next;
-    struct list_head *next_li = head;
+    struct list_head *next_li;
 
     while (fir_li != head && sec_li != head) {
         next_li = sec_li->next;
