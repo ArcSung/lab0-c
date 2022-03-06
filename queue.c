@@ -16,7 +16,6 @@
  */
 /* void q_show(struct list_head *head)
 {
-
     if (head == NULL || list_empty(head)) {
         return;
     }
@@ -158,10 +157,15 @@ element_t *q_remove_head(struct list_head *head, char *sp, size_t bufsize)
 
     li = head->next;
     tmp_el = list_entry(li, element_t, list);
-    int cpy_size =
-        sizeof(tmp_el->value) > bufsize ? bufsize : sizeof(tmp_el->value);
 
-    memcpy(sp, tmp_el->value, cpy_size);
+    if (sp) {
+        int cpy_size = strlen(tmp_el->value) > bufsize - 1
+                           ? bufsize - 1
+                           : strlen(tmp_el->value);
+
+        memcpy(sp, tmp_el->value, cpy_size);
+        *(sp + cpy_size) = '\0';
+    }
 
     li->next->prev = head;
     head->next = li->next;
@@ -185,10 +189,14 @@ element_t *q_remove_tail(struct list_head *head, char *sp, size_t bufsize)
     li = head->prev;
     tmp_el = list_entry(li, element_t, list);
 
-    int cpy_size =
-        sizeof(tmp_el->value) > bufsize ? bufsize : sizeof(tmp_el->value);
+    if (sp) {
+        int cpy_size = strlen(tmp_el->value) > bufsize - 1
+                           ? bufsize - 1
+                           : strlen(tmp_el->value);
 
-    memcpy(sp, tmp_el->value, cpy_size);
+        memcpy(sp, tmp_el->value, cpy_size);
+        *(sp + cpy_size) = '\0';
+    }
 
     head->prev = li->prev;
     li->prev->next = head;
