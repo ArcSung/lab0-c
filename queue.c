@@ -38,11 +38,11 @@
 
 static element_t *el_new(char *s)
 {
-    int str_size = sizeof(s);
+    int str_size = strlen(s);
     element_t *new_el = malloc(sizeof(element_t));
 
     if (new_el) {
-        new_el->value = malloc(str_size);
+        new_el->value = malloc(str_size + 1);
 
         if (!new_el->value) {
             free(new_el);
@@ -50,6 +50,7 @@ static element_t *el_new(char *s)
         }
 
         memcpy(new_el->value, s, str_size);
+        *(new_el->value + str_size) = '\0';
         return new_el;
     }
 
@@ -95,6 +96,10 @@ void q_free(struct list_head *l)
  */
 bool q_insert_head(struct list_head *head, char *s)
 {
+    if (head == NULL) {
+        return false;
+    }
+
     element_t *new_el = el_new(s);
 
     if (new_el) {
@@ -114,6 +119,10 @@ bool q_insert_head(struct list_head *head, char *s)
  */
 bool q_insert_tail(struct list_head *head, char *s)
 {
+    if (head == NULL) {
+        return false;
+    }
+
     element_t *new_el = el_new(s);
 
     if (new_el) {
@@ -148,9 +157,10 @@ element_t *q_remove_head(struct list_head *head, char *sp, size_t bufsize)
     }
 
     li = head->next;
+    tmp_el = list_entry(li, element_t, list);
     int cpy_size =
         sizeof(tmp_el->value) > bufsize ? bufsize : sizeof(tmp_el->value);
-    tmp_el = list_entry(li, element_t, list);
+
     memcpy(sp, tmp_el->value, cpy_size);
 
     li->next->prev = head;
@@ -173,9 +183,11 @@ element_t *q_remove_tail(struct list_head *head, char *sp, size_t bufsize)
     }
 
     li = head->prev;
+    tmp_el = list_entry(li, element_t, list);
+
     int cpy_size =
         sizeof(tmp_el->value) > bufsize ? bufsize : sizeof(tmp_el->value);
-    tmp_el = list_entry(li, element_t, list);
+
     memcpy(sp, tmp_el->value, cpy_size);
 
     head->prev = li->prev;
