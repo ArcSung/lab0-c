@@ -331,7 +331,7 @@ void q_sort(struct list_head *head)
 
         // find the min
         for (int j = 0; j < i; j++) {
-            if (cur_el->value[0] < min_el->value[0]) {
+            if (strcmp(cur_el->value, min_el->value) < 0) {
                 min_li = cur_li;
                 min_el = list_entry(min_li, element_t, list);
             }
