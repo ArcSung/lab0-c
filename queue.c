@@ -11,6 +11,31 @@
  *   cppcheck-suppress nullPointer
  */
 
+/*
+ * For debug.
+ */
+/* void q_show(struct list_head *head)
+{
+
+    if (head == NULL || list_empty(head)) {
+        return;
+    }
+
+    struct list_head *cur_li = head->next;
+    int size = q_size(head);
+
+    printf("queue: [ ");
+
+    for (int i = 0; i < size; i++) {
+        element_t *cur_el = list_entry(cur_li, element_t, list);
+
+        printf("%s ", cur_el->value);
+
+        cur_li = cur_li->next;
+    }
+    printf("]\n ");
+} */
+
 static element_t *el_new(char *s)
 {
     int str_size = sizeof(s);
@@ -277,4 +302,45 @@ void q_reverse(struct list_head *head)
  * No effect if q is NULL or empty. In addition, if q has only one
  * element, do nothing.
  */
-void q_sort(struct list_head *head) {}
+void q_sort(struct list_head *head)
+{
+    if (head == NULL || list_empty(head)) {
+        return;
+    }
+
+    struct list_head *pre_li = head;
+    struct list_head *cur_li = head->next;
+    struct list_head *min_li = head->next;
+    int size = q_size(head);
+
+    for (int i = size; i > 0; i--) {
+        element_t *cur_el = list_entry(cur_li, element_t, list);
+        element_t *min_el = list_entry(cur_li, element_t, list);
+
+        // find the min
+        for (int j = 0; j < i; j++) {
+            if (cur_el->value[0] < min_el->value[0]) {
+                min_li = cur_li;
+                min_el = list_entry(min_li, element_t, list);
+            }
+            cur_li = cur_li->next;
+            cur_el = list_entry(cur_li, element_t, list);
+        }
+
+        if (min_li != pre_li->next) {
+            // adjust the orignal node
+            min_li->prev->next = min_li->next;
+            min_li->next->prev = min_li->prev;
+
+            // insert to the new node
+            pre_li->next->prev = min_li;
+            min_li->next = pre_li->next;
+            pre_li->next = min_li;
+            min_li->prev = pre_li;
+        }
+
+        cur_li = min_li->next;
+        min_li = cur_li;
+        pre_li = pre_li->next;
+    }
+}
