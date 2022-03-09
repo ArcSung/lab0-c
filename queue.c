@@ -397,39 +397,43 @@ void q_sort(struct list_head *head)
         return;
     }
 
-    struct list_head *pre_li = head;
-    struct list_head *cur_li = head->next;
-    struct list_head *min_li = head->next;
-    int size = q_size(head);
+    struct list_head *pivot = head->next;
+    struct list_head *curr = pivot->next;
 
-    for (int i = size; i > 0; i--) {
-        element_t *cur_el = list_entry(cur_li, element_t, list);
-        element_t *min_el = list_entry(cur_li, element_t, list);
+    char *pivot_data = list_entry(pivot, element_t, list)->value;
 
-        // find the min
-        for (int j = 0; j < i; j++) {
-            if (strcmp(cur_el->value, min_el->value) < 0) {
-                min_li = cur_li;
-                min_el = list_entry(min_li, element_t, list);
-            }
-            cur_li = cur_li->next;
-            cur_el = list_entry(cur_li, element_t, list);
+    while (curr != head) {
+        struct list_head *tmp = curr->next;
+        if (strcmp(list_entry(curr, element_t, list)->value, pivot_data) < 0) {
+            list_move(curr, head);
         }
-
-        if (min_li != pre_li->next) {
-            // adjust the orignal node
-            min_li->prev->next = min_li->next;
-            min_li->next->prev = min_li->prev;
-
-            // insert to the new node
-            pre_li->next->prev = min_li;
-            min_li->next = pre_li->next;
-            pre_li->next = min_li;
-            min_li->prev = pre_li;
-        }
-
-        cur_li = min_li->next;
-        min_li = cur_li;
-        pre_li = pre_li->next;
+        curr = tmp;
     }
+
+    // make left ring
+    curr = head->prev;
+    head->prev = pivot->prev;
+    pivot->prev->next = head;
+
+    q_sort(head);
+
+    head->prev->next = pivot;
+    pivot->prev = head->prev;
+
+    curr->next = head;
+    head->prev = curr;
+
+    // make right ring
+    curr = head->next;
+    head->next = pivot->next;
+    pivot->next->prev = head;
+
+    q_sort(head);
+
+    // merge two ring
+    pivot->next = head->next;
+    head->next->prev = pivot;
+
+    head->next = curr;
+    curr->prev = head;
 }
