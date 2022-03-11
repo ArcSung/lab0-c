@@ -391,7 +391,75 @@ void q_reverse(struct list_head *head)
  * No effect if q is NULL or empty. In addition, if q has only one
  * element, do nothing.
  */
+
 void q_sort(struct list_head *head)
+{
+    if (head == NULL || list_empty(head) || head->next->next == head) {
+        return;
+    }
+
+    struct list_head *left = head->next;
+    struct list_head *right = head->next;
+    struct list_head *tmp;
+
+
+    while (right->next != head) {
+        right = right->next;
+        if (right->next != head) {
+            right = right->next;
+            left = left->next;
+        }
+    }
+
+    // make left ring
+    tmp = left->next;
+    left->next = head;
+    head->prev = left;
+    q_sort(head);
+    left = head->next;
+
+    // make right ring
+    head->next = tmp;
+    tmp->prev = head;
+    q_sort(head);
+    right = head->next;
+
+    tmp = head;
+    // merge two ring
+    while (left != head || right != head) {
+
+        if (left != head && right != head) {
+            if (strcmp(list_entry(left, element_t, list)->value,
+                       list_entry(right, element_t, list)->value) < 0) {
+                tmp->next = left;
+                left->prev = tmp;
+                left = left->next;
+            } else {
+                tmp->next = right;
+                right->prev = tmp;
+                right = right->next;
+            }
+        } else {
+            if (left == head) {
+                tmp->next = right;
+                right->prev = tmp;
+                right = right->next;
+            } else {
+                tmp->next = left;
+                left->prev = tmp;
+                left = left->next;
+            }
+        }
+
+        tmp = tmp->next;
+    }
+
+    tmp->next = head;
+    head->prev = tmp;
+}
+
+// Quick sort
+/* void q_sort(struct list_head *head)
 {
     if (head == NULL || list_empty(head)) {
         return;
@@ -436,4 +504,4 @@ void q_sort(struct list_head *head)
 
     head->next = curr;
     curr->prev = head;
-}
+} */
